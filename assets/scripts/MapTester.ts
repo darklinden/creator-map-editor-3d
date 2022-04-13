@@ -18,8 +18,9 @@ export class MapTester extends CompActive {
     @property({ type: Node, visible: true })
     private _des: Node = null;
 
+    public get compActive(): boolean { return this._compActive; }
     public set compActive(v: boolean) {
-        this._componentActive = v;
+        this._compActive = v;
         this._player && (this._player.node.active = v);
         this._des && (this._des.active = v);
         if (v) {
@@ -32,7 +33,7 @@ export class MapTester extends CompActive {
 
     private _mouseDown: boolean = false;
     private onMouseDown(event: EventMouse) {
-        if (this.compActive) return;
+        if (!this.compActive) return;
         const location = event.getLocation();
         this._mouseDown = true;
         this.onClickPos(location);

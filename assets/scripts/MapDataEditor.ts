@@ -31,7 +31,7 @@ export class MapDataEditor extends CompActive {
     private _mapData: IMapData = null;
     public get mapData(): IMapData { return this._mapData; }
 
-    private _markWalkable: number = -1;
+    private _markWalkable: number = 0;
     public onSetWalkable(g: SwitcherGroup) {
         this._markWalkable = g.selectedIndex;
     }
@@ -77,8 +77,9 @@ export class MapDataEditor extends CompActive {
         }
     }
 
+    public get compActive(): boolean { return this._compActive; }
     set compActive(v: boolean) {
-        this._componentActive = v;
+        this._compActive = v;
         if (v) {
             input.on(Input.EventType.MOUSE_DOWN, this.onMouseDown, this);
             input.on(Input.EventType.MOUSE_MOVE, this.onMouseMove, this);
@@ -93,14 +94,14 @@ export class MapDataEditor extends CompActive {
 
     private _mouseDown: boolean = false;
     private onMouseDown(event: EventMouse) {
-        if (this.compActive) return;
+        if (!this.compActive) return;
         const location = event.getLocation();
         this._mouseDown = true;
         this.onClickPos(location);
     }
 
     private onMouseMove(event: EventMouse) {
-        if (this.compActive) return;
+        if (!this.compActive) return;
         const location = event.getLocation();
         this.onClickPos(location);
     }
