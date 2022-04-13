@@ -1,6 +1,7 @@
 
 import { _decorator, Component, Node, Input, input, EventMouse, geometry, Vec2, PhysicsSystem, Vec3 } from 'cc';
 import { CompActive } from './CompActive';
+import { HermiteMove } from './HermiteMove';
 import { MapDataEditor } from './MapDataEditor';
 
 const { ccclass, property } = _decorator;
@@ -11,15 +12,15 @@ export class MapTester extends CompActive {
     @property({ type: MapDataEditor, visible: true })
     private _map: MapDataEditor = null;
 
-    @property({ type: Node, visible: true })
-    private _player: Node = null;
+    @property({ type: HermiteMove, visible: true })
+    private _player: HermiteMove = null;
 
     @property({ type: Node, visible: true })
     private _des: Node = null;
 
     public set compActive(v: boolean) {
         this._componentActive = v;
-        this._player && (this._player.active = v);
+        this._player && (this._player.node.active = v);
         this._des && (this._des.active = v);
         if (v) {
             input.on(Input.EventType.MOUSE_DOWN, this.onMouseDown, this);
@@ -60,32 +61,14 @@ export class MapTester extends CompActive {
         this._des.position = p;
         this._des.active = true;
 
-        const path = this._map.findPath(this._player.position, p);
+        this._player.stop();
+
+        const path = this._map.findPath(this._player.node.position, p);
 
         if (path && path.length) {
-            this._path = path;
-            this._timePassed = 0;
-            this._moveDuration = (path.length - 1) * 0.3;
-        }
-    }
-
-    private _timePassed: number = -1;
-    private _moveDuration: number = 0;
-    update(dt: number) {
-        if (this._timePassed < 0) return;
-
-        this._timePassed += dt;
-        if (this._timePassed < this._moveDuration) {
-            const process = this._timePassed / this._moveDuration;
-            const sec = Math.floor((this._path.length - 1) * process);
-            const ps = this._path[sec], pe = this._path[sec + 1];
-            let pp = process - (sec / (this._path.length - 1));
-            pp *= this._path.length - 1;
-            this._player.position = ps.clone().add(pe.clone().subtract(ps).multiplyScalar(pp));
-        }
-        else {
-            this._player.position = this._path[this._path.length - 1];
-            this._des.active = false;
+            this._player.runArray(path, (path.length - 1) * 0.3, h => {
+                this._des.active = false;
+            });
         }
     }
 }
